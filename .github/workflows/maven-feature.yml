@@ -33,7 +33,7 @@ jobs:
       - name: Setup Mysql database
         run: |
           sudo /etc/init.d/mysql start
-          mysql -e 'CREATE DATABASE quora-db;' -uroot -proot
+          mysql -e 'CREATE DATABASE quora;' -uroot -proot
           mysql -e 'SHOW DATABASES;' -uroot -proot
       - name: Maven Package
         run: mvn clean package
