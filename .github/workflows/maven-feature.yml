@@ -13,17 +13,16 @@ jobs:
     name: Unit Test
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-      image: mysql:5.6
-      env:
-        MYSQL_DATABASE: quora-db
-        MYSQL_ROOT_PASSWORD: root
-        MYSQL_USER: app-quora
-        MYSQL_PASSWORD: root
-      ports:
-        - 3306:3306
-      options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+#    services:
+#      mysql: mysql:5.6
+#      env:
+#        MYSQL_DATABASE: quora-db
+#        MYSQL_ROOT_PASSWORD: root
+#        MYSQL_USER: app-quora
+#        MYSQL_PASSWORD: root
+#      ports:
+#        - 3306:3306
+#      options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       - uses: actions/checkout@v1
@@ -31,6 +30,11 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.11
+      - name: Setup Mysql database
+        run: |
+          sudo /etc/init.d/mysql start
+          mysql -e 'CREATE DATABASE app-quora;' -uapp-quora -proot
+          mysql -e 'SHOW DATABASES;' -uapp-quora -proot
       - name: Maven Package
         run: mvn clean package
       - name: Maven Verify
