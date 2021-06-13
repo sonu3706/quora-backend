@@ -27,15 +27,4 @@ public class UserController {
         }
         return responseEntity;
     }
-
-    @GetMapping("/message")
-    public ResponseEntity<?> getMessage() {
-        ResponseEntity<?> responseEntity = null;
-        try {
-            responseEntity = ResponseEntity.status(200).body("Hi Chandan");
-        } catch (Exception exception) {
-            responseEntity = ResponseEntity.status(409).body(exception.getMessage());
-        }
-        return responseEntity;
-    }
 }

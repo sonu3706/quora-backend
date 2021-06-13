@@ -29,15 +29,13 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Boolean createUserAccount(UserAuth userAuth) {
-        boolean status = Boolean.FALSE;
         Optional<UserAuth> userAuthOptional = this.authRepository.findUserAuthsByUserEmail(userAuth.getUserEmail());
         if (userAuthOptional.isPresent()) {
             throw new AuthException.UserAlreadyExists(USER_ALREADY_EXISTS);
         } else {
             authRepository.save(UserMapper.createUserAuthObject(userAuth));
-            status = Boolean.TRUE;
         }
-        return status;
+        return Boolean.TRUE;
     }
 
     @Override
