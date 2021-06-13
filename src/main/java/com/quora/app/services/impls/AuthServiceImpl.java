@@ -2,6 +2,7 @@ package com.quora.app.services.impls;
 
 import com.quora.app.exceptions.AuthException;
 import com.quora.app.exceptions.TokenException;
+import com.quora.app.models.JwtResponse;
 import com.quora.app.models.UserAuth;
 import com.quora.app.repositories.AuthRepository;
 import com.quora.app.services.AuthService;
@@ -10,11 +11,9 @@ import com.quora.app.services.mappers.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
 import java.util.Optional;
 
-import static com.quora.app.utilities.ExceptionConstant.UNABLE_TO_GENERATE_TOKEN;
-import static com.quora.app.utilities.ExceptionConstant.USER_DOES_EXISTS_EXCEPTION;
+import static com.quora.app.utilities.ExceptionConstant.*;
 
 
 @Service
@@ -33,7 +32,7 @@ public class AuthServiceImpl implements AuthService {
         boolean status = Boolean.FALSE;
         Optional<UserAuth> userAuthOptional = this.authRepository.findUserAuthsByUserEmail(userAuth.getUserEmail());
         if (userAuthOptional.isPresent()) {
-            System.out.println("Throw Exception");
+            throw new AuthException.UserAlreadyExists(USER_ALREADY_EXISTS);
         } else {
             authRepository.save(UserMapper.createUserAuthObject(userAuth));
             status = Boolean.TRUE;
@@ -42,18 +41,18 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Map<String, String> loginUser(UserAuth userAuth) {
-        Map<String, String> tokenMap = null;
+    public JwtResponse loginUser(UserAuth userAuth) {
+        JwtResponse jwtResponse = null;
         UserAuth userAuthObject = this.authRepository.findUserAuthsByUserEmailAndUserPassword(userAuth.getUserEmail(), userAuth.getUserPassword())
                 .orElseThrow(() -> new AuthException.UserNotFound(USER_DOES_EXISTS_EXCEPTION));
         if (userAuthObject.getUserActiveState() && userAuthObject.getUserPassword().equals(userAuth.getUserPassword())) {
             /*Generate JWT token*/
-            tokenMap = jwtTokenService.generateToken(userAuthObject.getUserEmail());
-            Optional.ofNullable(tokenMap.get("token")).orElseThrow(() -> new TokenException.UnableToGenerateToken(UNABLE_TO_GENERATE_TOKEN));
+            jwtResponse = jwtTokenService.generateToken(userAuthObject.getUserEmail());
+            Optional.ofNullable(jwtResponse.getJwtToken()).orElseThrow(() -> new TokenException.UnableToGenerateToken(UNABLE_TO_GENERATE_TOKEN));
         } else {
             /* Throw Exception of password mismatch exception */
-            System.out.println("Password did not match");
+           throw new AuthException.PasswordMisMatch(USERID_PASSWORD_MISMATCH);
         }
-        return tokenMap;
+        return jwtResponse;
     }
 }

@@ -34,7 +34,7 @@ public class JwtUtil implements Serializable {
 
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String userName = getUserNameFromToken(token);
-        return (userName.equals(userDetails.getUsername())  && !isTokenExpired(token));
+        return (userName.equals(userDetails.getUsername()) && !isTokenExpired(token));
 
     }
 
@@ -52,6 +52,10 @@ public class JwtUtil implements Serializable {
     public <T> T getClaimsFromToken(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
         return claimsResolver.apply(claims);
+    }
+
+    public Claims getAllClaimsFromToken(String token) {
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
     }
 
     /* Check if token is expired or not */

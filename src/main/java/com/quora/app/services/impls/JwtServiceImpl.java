@@ -1,12 +1,11 @@
 package com.quora.app.services.impls;
 
+import com.quora.app.models.JwtResponse;
 import com.quora.app.services.TokenService;
 import com.quora.app.utilities.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -20,11 +19,9 @@ public class JwtServiceImpl implements TokenService {
     }
 
     @Override
-    public Map<String, String> generateToken(String userEmail) {
-        Map<String, String> tokenDetails = new HashMap<>();
+    public JwtResponse generateToken(String userEmail) {
         String token = Optional.ofNullable(jwtUtil.generateToken(userEmail)).orElse(null);
-        tokenDetails.put("token", token);
-        return tokenDetails;
+        return JwtResponse.builder().jwtToken(token).build();
     }
 
     @Override
