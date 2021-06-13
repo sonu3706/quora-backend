@@ -29,7 +29,9 @@ public class QuestionServiceImpl implements QuestionService {
             Question questionObject = QuestionMapper.mapToQuestionObject(question);
              userQuestion = QuestionMapper.mapQuestionToUserQuestion(questionObject);
         }
-        questionRepository.save(userQuestion);
+        if (userQuestion != null) {
+            questionRepository.save(userQuestion);
+        }
         return false;
     }
 

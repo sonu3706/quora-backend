@@ -1,5 +1,7 @@
 package com.quora.app.services.impls;
 
+import com.quora.app.exceptions.AuthException;
+import com.quora.app.exceptions.TokenException;
 import com.quora.app.models.UserAuth;
 import com.quora.app.repositories.AuthRepository;
 import com.quora.app.services.AuthService;
@@ -10,6 +12,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.Optional;
+
+import static com.quora.app.utilities.ExceptionConstant.UNABLE_TO_GENERATE_TOKEN;
+import static com.quora.app.utilities.ExceptionConstant.USER_DOES_EXISTS_EXCEPTION;
+
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -37,19 +43,17 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Map<String, String> loginUser(UserAuth userAuth) {
-        Map<String, String> token = null;
-        Optional<UserAuth> userAuthOptional = this.authRepository.findUserAuthsByUserEmailAndUserPassword(userAuth.getUserEmail(), userAuth.getUserPassword());
-        if (userAuthOptional.isPresent()) {
-            UserAuth userAuthObject = userAuthOptional.get();
-            if (userAuthObject.getUserActiveState() && userAuthObject.getUserPassword().equals(userAuth.getUserPassword())) {
-                /*Generate JWT token*/
-             token =  jwtTokenService.generateToken(userAuthObject.getUserEmail());
-            } else {
-                System.out.println("Password did not match");
-            }
+        Map<String, String> tokenMap = null;
+        UserAuth userAuthObject = this.authRepository.findUserAuthsByUserEmailAndUserPassword(userAuth.getUserEmail(), userAuth.getUserPassword())
+                .orElseThrow(() -> new AuthException.UserNotFound(USER_DOES_EXISTS_EXCEPTION));
+        if (userAuthObject.getUserActiveState() && userAuthObject.getUserPassword().equals(userAuth.getUserPassword())) {
+            /*Generate JWT token*/
+            tokenMap = jwtTokenService.generateToken(userAuthObject.getUserEmail());
+            Optional.ofNullable(tokenMap.get("token")).orElseThrow(() -> new TokenException.UnableToGenerateToken(UNABLE_TO_GENERATE_TOKEN));
         } else {
-            System.out.println("Throw exception user not present");
+            /* Throw Exception of password mismatch exception */
+            System.out.println("Password did not match");
         }
-        return token;
+        return tokenMap;
     }
 }

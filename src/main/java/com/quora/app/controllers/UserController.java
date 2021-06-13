@@ -4,10 +4,7 @@ import com.quora.app.models.User;
 import com.quora.app.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/api/v1/users")
@@ -25,6 +22,17 @@ public class UserController {
         ResponseEntity<?> responseEntity = null;
         try {
             responseEntity = ResponseEntity.status(201).body(userService.saveUser(user));
+        } catch (Exception exception) {
+            responseEntity = ResponseEntity.status(409).body(exception.getMessage());
+        }
+        return responseEntity;
+    }
+
+    @GetMapping("/message")
+    public ResponseEntity<?> getMessage() {
+        ResponseEntity<?> responseEntity = null;
+        try {
+            responseEntity = ResponseEntity.status(200).body("Hi Chandan");
         } catch (Exception exception) {
             responseEntity = ResponseEntity.status(409).body(exception.getMessage());
         }

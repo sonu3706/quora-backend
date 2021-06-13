@@ -6,12 +6,14 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.time.LocalDate;
 
+@Builder
 @Getter
 @Setter
 @ToString
-@AllArgsConstructor
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+
 public class UserAuth {
     @Id
     private Integer id;

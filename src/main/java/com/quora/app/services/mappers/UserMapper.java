@@ -17,9 +17,14 @@ public class UserMapper {
     }
 
     public static User createUserObject(User user) {
-        user.setUserActive(Boolean.TRUE);
-        user.setUserAddedOn(LocalDate.now());
-        user.setProfileModifiedOn(LocalDate.now());
-        return user;
+        return User.builder()
+                .userEmail(user.getUserEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .gender(user.getGender())
+                .userActive(Boolean.TRUE)
+                .userAddedOn(LocalDate.now())
+                .profileModifiedOn(LocalDate.now())
+                .build();
     }
 }

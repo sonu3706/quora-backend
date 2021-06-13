@@ -7,12 +7,13 @@ import javax.persistence.Id;
 import java.time.LocalDate;
 
 @Data
+@Builder
 @Getter
 @Setter
 @ToString
-@AllArgsConstructor
-@NoArgsConstructor
 @Document
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class User {
     @Id
     private String userEmail;

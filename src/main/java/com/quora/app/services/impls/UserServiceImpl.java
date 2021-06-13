@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
         boolean status = Boolean.FALSE;
         Optional<User> userOptional = this.userRepository.findByUserEmail(user.getUserEmail());
         if (userOptional.isPresent()) {
-            System.out.println("throw excepton");
+            System.out.println("throw exception");
         } else {
             this.userRepository.save(UserMapper.createUserObject(user));
             status = Boolean.TRUE;

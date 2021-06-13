@@ -10,4 +10,10 @@ public class AuthException {
             super(message);
         }
     }
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public static class PasswordMisMatch extends RuntimeException {
+        public PasswordMisMatch(String message) {
+            super(message);
+        }
+    }
 }
