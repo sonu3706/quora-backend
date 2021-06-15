@@ -49,4 +49,14 @@ public class QuestionServiceImpl implements QuestionService {
     public Question updateQuestionByQuestionId(String questionId, Question question) {
         return null;
     }
+
+    @Override
+    public List<Question> getAllQuestions() {
+        return null;
+    }
+
+    @Override
+    public Question getQuestionByQuestionId(String id) {
+        return null;
+    }
 }

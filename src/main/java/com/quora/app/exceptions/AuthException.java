@@ -22,4 +22,10 @@ public class AuthException {
             super(message);
         }
     }
+
+    public static class PasswordSame extends RuntimeException {
+        public PasswordSame(String message) {
+            super(message);
+        }
+    }
 }

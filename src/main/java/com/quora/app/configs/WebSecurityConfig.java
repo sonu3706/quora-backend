@@ -55,9 +55,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http = http.exceptionHandling().authenticationEntryPoint((request, response, authException) -> {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
         }).and();
-
         /* Set permission of endpoints */
-        http.authorizeRequests().antMatchers("/api/v1/auth/**").permitAll().anyRequest().authenticated();
+        http.authorizeRequests().antMatchers("/api/v1/auth/login").permitAll().anyRequest().authenticated();
+        http.authorizeRequests().antMatchers("/api/v1/auth/register").permitAll().anyRequest().authenticated();
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
 

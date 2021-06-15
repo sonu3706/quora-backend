@@ -5,7 +5,12 @@ import com.quora.app.models.Question;
 import java.util.List;
 
 public interface QuestionService {
+
+    public List<Question> getAllQuestions();
+
     public Boolean postQuestion(Question question);
+
+    public Question getQuestionByQuestionId(String id);
 
     public List<Question> getAllQuestionByUserId(String userId);
 

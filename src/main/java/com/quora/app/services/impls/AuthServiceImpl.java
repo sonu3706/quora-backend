@@ -11,6 +11,7 @@ import com.quora.app.services.mappers.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static com.quora.app.utilities.ExceptionConstant.*;
@@ -31,7 +32,7 @@ public class AuthServiceImpl implements AuthService {
     public Boolean createUserAccount(UserAuth userAuth) {
         Optional<UserAuth> userAuthOptional = this.authRepository.findUserAuthsByUserEmail(userAuth.getUserEmail());
         if (userAuthOptional.isPresent()) {
-            throw new AuthException.UserAlreadyExists(USER_ALREADY_EXISTS);
+            throw new AuthException.UserAlreadyExists(USER_ALREADY_EXISTS + "with id:- " + userAuth.getUserEmail());
         } else {
             authRepository.save(UserMapper.createUserAuthObject(userAuth));
         }
@@ -42,7 +43,7 @@ public class AuthServiceImpl implements AuthService {
     public JwtResponse loginUser(UserAuth userAuth) {
         JwtResponse jwtResponse = null;
         UserAuth userAuthObject = this.authRepository.findUserAuthsByUserEmailAndUserPassword(userAuth.getUserEmail(), userAuth.getUserPassword())
-                .orElseThrow(() -> new AuthException.UserNotFound(USER_DOES_EXISTS_EXCEPTION));
+                .orElseThrow(() -> new AuthException.UserNotFound(USER_DOES_NOT_EXISTS_EXCEPTION  + userAuth.getUserEmail()));
         if (userAuthObject.getUserActiveState() && userAuthObject.getUserPassword().equals(userAuth.getUserPassword())) {
             /*Generate JWT token*/
             jwtResponse = jwtTokenService.generateToken(userAuthObject.getUserEmail());
@@ -52,5 +53,32 @@ public class AuthServiceImpl implements AuthService {
            throw new AuthException.PasswordMisMatch(USERID_PASSWORD_MISMATCH);
         }
         return jwtResponse;
+    }
+
+    @Override
+    public Boolean deleteUserAccount(String userEmailId) {
+        UserAuth userAuth = authRepository.findUserAuthsByUserEmail(userEmailId)
+                .orElseThrow(() -> new AuthException.UserNotFound(USER_DOES_NOT_EXISTS_EXCEPTION + userEmailId));
+        authRepository.delete(userAuth);
+        return Boolean.TRUE;
+    }
+
+    @Override
+    public Boolean changeUserPassword(UserAuth userAuth) {
+        UserAuth userAuthObject = authRepository.findUserAuthsByUserEmail(userAuth.getUserEmail())
+                .orElseThrow(() -> new AuthException.UserNotFound(USER_DOES_NOT_EXISTS_EXCEPTION + userAuth.getUserEmail()));
+        if (userAuthObject.getUserPassword().equalsIgnoreCase(userAuth.getUserPassword())) {
+            throw new AuthException.PasswordSame(PASSWORD_CHARACTER_SAME);
+        } else {
+            userAuthObject.setUserPassword(userAuth.getUserPassword());
+            userAuthObject.setAccountModifiedOn(LocalDate.now());
+            authRepository.save(userAuthObject);
+        }
+        return Boolean.TRUE;
+    }
+
+    @Override
+    public Boolean deactivateUserAccount(UserAuth userAuth) {
+        return null;
     }
 }
