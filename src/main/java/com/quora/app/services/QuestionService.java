@@ -6,15 +6,15 @@ import java.util.List;
 
 public interface QuestionService {
 
-    public List<Question> getAllQuestions();
+    List<Question> getAllQuestions();
 
-    public Boolean postQuestion(Question question);
+    Boolean postQuestion(Question question);
 
-    public Question getQuestionByQuestionId(String id);
+    Question getQuestionByQuestionId(String id);
 
-    public List<Question> getAllQuestionByUserId(String userId);
+    List<Question> getAllQuestionByUserId(String userId);
 
-    public Boolean deleteQuestionByQuestionId(String questionId);
+    Boolean deleteQuestionByQuestionId(String questionId);
 
-    public Question updateQuestionByQuestionId(String questionId, Question question);
+    Question updateQuestionByQuestionId(String questionId, Question question);
 }

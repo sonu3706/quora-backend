@@ -25,26 +25,26 @@ public class QuestionController {
 
     @GetMapping()
     public ResponseEntity<?> getAllQuestion() {
-        return ResponseEntity.ok(questionService.getAllQuestions());
+        return ResponseEntity.status(HttpStatus.OK).body(questionService.getAllQuestions());
     }
 
     @GetMapping(value = "/{id}")
     public ResponseEntity<?> getQuestionById(@PathVariable("id") String id) {
-        return ResponseEntity.ok(questionService.getQuestionByQuestionId(id));
+      return ResponseEntity.status(HttpStatus.OK).body(questionService.getQuestionByQuestionId(id));
     }
 
     @PutMapping(value = "/{id}")
     public ResponseEntity<?> updateQuestionById(@PathVariable("id") String id, @RequestBody() Question question) {
-        return ResponseEntity.ok(questionService.updateQuestionByQuestionId(id, question));
+        return ResponseEntity.status(HttpStatus.OK).body(questionService.updateQuestionByQuestionId(id, question));
     }
 
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<?> deleteQuestionById(@PathVariable("id") String id) {
-       return ResponseEntity.ok(questionService.deleteQuestionByQuestionId(id));
+       return ResponseEntity.status(HttpStatus.OK).body(questionService.deleteQuestionByQuestionId(id));
     }
 
     @GetMapping(value = "/{userId}")
     public ResponseEntity<?> getAllQuestionByUserId(@PathVariable("userId") String userId) {
-        return ResponseEntity.ok(questionService.getAllQuestionByUserId(userId));
+        return ResponseEntity.status(HttpStatus.OK).body(questionService.getAllQuestionByUserId(userId));
     }
 }

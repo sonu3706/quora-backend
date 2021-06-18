@@ -41,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public JwtResponse loginUser(UserAuth userAuth) {
-        JwtResponse jwtResponse = null;
+        JwtResponse jwtResponse;
         UserAuth userAuthObject = this.authRepository.findUserAuthsByUserEmailAndUserPassword(userAuth.getUserEmail(), userAuth.getUserPassword())
                 .orElseThrow(() -> new AuthException.UserNotFound(USER_DOES_NOT_EXISTS_EXCEPTION  + userAuth.getUserEmail()));
         if (userAuthObject.getUserActiveState() && userAuthObject.getUserPassword().equals(userAuth.getUserPassword())) {

@@ -6,4 +6,7 @@ public interface ExceptionConstant {
     String USER_ALREADY_EXISTS = "User Already exists, Please try with new emailId or login with existing one";
     String USERID_PASSWORD_MISMATCH = "UserId & password did not match";
     String PASSWORD_CHARACTER_SAME = "Password character cannot be same, please provide different once.";
+
+    /* Questions Exceptions*/
+    String QUESTION_CONTENT_NULL = "Question content cannot be empty";
 }

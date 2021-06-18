@@ -7,15 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -29,9 +26,9 @@ import javax.servlet.http.HttpServletResponse;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private JwtUserDetailsService jwtUserDetailsService;
-    private JwtRequestFilter jwtRequestFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtUserDetailsService jwtUserDetailsService;
+    private final JwtRequestFilter jwtRequestFilter;
 
     @Autowired
     public WebSecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, JwtUserDetailsService jwtUserDetailsService, JwtRequestFilter jwtRequestFilter) {
@@ -52,9 +49,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         /* Set Session management to stateless */
         http = http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and();
         /* Set unauthorized request exception handler */
-        http = http.exceptionHandling().authenticationEntryPoint((request, response, authException) -> {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
-        }).and();
+        http = http.exceptionHandling().authenticationEntryPoint((request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage())).and();
         /* Set permission of endpoints */
         http.authorizeRequests().antMatchers("/api/v1/auth/login").permitAll().anyRequest().authenticated();
         http.authorizeRequests().antMatchers("/api/v1/auth/register").permitAll().anyRequest().authenticated();

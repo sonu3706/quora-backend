@@ -19,7 +19,7 @@ public class UserController {
 
     @PostMapping()
     public ResponseEntity<?> saveUser(@RequestBody User user) {
-        ResponseEntity<?> responseEntity = null;
+        ResponseEntity<?> responseEntity;
         try {
             responseEntity = ResponseEntity.status(201).body(userService.saveUser(user));
         } catch (Exception exception) {
