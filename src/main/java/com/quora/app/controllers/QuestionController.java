@@ -18,7 +18,7 @@ public class QuestionController {
         this.questionService = questionService;
     }
 
-    @PostMapping()
+    @PostMapping(value = "/post")
     public ResponseEntity<?> postQuestion(@RequestBody() Question question) {
         return ResponseEntity.status(HttpStatus.CREATED).body(questionService.postQuestion(question));
     }

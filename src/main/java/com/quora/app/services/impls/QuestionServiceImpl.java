@@ -36,9 +36,11 @@ public class QuestionServiceImpl implements QuestionService {
         UserQuestion userQuestion;
         Optional.ofNullable(question.getQuestionContent()).orElseThrow(() -> new QuestionException.QuestionContentNull(QUESTION_CONTENT_NULL));
         Question questionObject = QuestionMapper.mapToQuestionObject(question);
-        List<Category> categoryList = QuestionMapper.mapCategoryObject(question.getCategories());
+        if (question.getCategories().isEmpty()) {
+            List<Category> categoryList = QuestionMapper.mapCategoryObject(question.getCategories());
+            categoryRepository.saveAll(categoryList);
+        }
         userQuestion = QuestionMapper.mapQuestionToUserQuestion(questionObject);
-        categoryRepository.saveAll(categoryList);
         questionRepository.save(userQuestion);
         return Boolean.TRUE;
     }
