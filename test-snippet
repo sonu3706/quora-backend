@@ -1,3 +1,12 @@
+https://coderstea.in/post/java/junit-5-introduction-for-tdd-development-in-java/
+https://thepracticaldeveloper.com/guide-spring-boot-controller-tests/
+https://stackoverflow.com/questions/38711871/load-different-application-yml-in-springboot-test
+https://stackoverflow.com/questions/39690094/spring-boot-default-profile-for-integration-tests/56442693
+https://www.concretepage.com/spring-5/activeprofiles-example-spring-test
+
+https://stackoverflow.com/questions/27216388/what-happens-in-spring-if-i-use-the-activeprofiles-annotation-on-a-configuratio
+
+
 package com.demo.springtest.controller;
 
 import com.demo.springtest.models.UserAuth;
@@ -256,4 +265,212 @@ public class AuthControllerTest {
         verifyNoMoreInteractions(authService);
     }
 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Junit 5 implemented
+
+@SpringBootTest(classes = AutoEndorsementApplication.class)
+@RunWith(SpringRunner.class)
+@AutoConfigureMockMvc(addFilters = false)
+public class NomineeManagementControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private NomineesService mockedNomineeService;
+
+    @Test
+    public void addNomineeSuccessTest() throws Exception {
+        when(mockedNomineeService.addNewNominees(any(NomineesRequestDto.class))).thenReturn(getNomineeDtoList());
+        NomineesRequestDto nomineesRequestDto = createNomineeRequestDto();
+        MvcResult mvcResult = mockMvc.perform(
+                post("/api/nominees/create").contentType(MediaType.APPLICATION_JSON).content(jsonToString(nomineesRequestDto)))
+                .andExpect(status().isCreated()).andReturn();
+        List<NomineeDto> nomineeDtoList = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(),
+                List.class);
+        assertEquals(201, mvcResult.getResponse().getStatus());
+        assertEquals(3, nomineeDtoList.size());
+        verify(mockedNomineeService, times(1)).addNewNominees(any(NomineesRequestDto.class));
+        verifyNoMoreInteractions(mockedNomineeService);
+    }
+
+    @Test
+    public void addNomineeFailureTest() throws Exception {
+        HttpSenderException httpSenderException = new HttpSenderException(HttpSenderErrorCode.CLIENT_ERROR,
+                "Unable to resolve", HttpStatus.BAD_REQUEST, new HashMap<>(), null);
+        httpSenderException.setErrorCode(HttpSenderErrorCode.CLIENT_ERROR);
+
+        when(mockedNomineeService.addNewNominees(any(NomineesRequestDto.class))).thenThrow(httpSenderException);
+        NomineesRequestDto nomineesRequestDto = createNomineeRequestDto();
+        MvcResult mvcResult = mockMvc.perform(
+                post("/api/nominees/create").contentType(MediaType.APPLICATION_JSON).content(jsonToString(nomineesRequestDto)))
+                .andExpect(status().isNotAcceptable()).andReturn();
+
+        ErrorResponse errorResponse = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(),
+                ErrorResponse.class);
+        assertEquals(406, mvcResult.getResponse().getStatus());
+        assertEquals("ClientError", errorResponse.getErrorCode());
+        verify(mockedNomineeService, times(1)).addNewNominees(any(NomineesRequestDto.class));
+        verifyNoMoreInteractions(mockedNomineeService);
+    }
+
+    @Test
+    public void addNomineeDataMissingTest() throws Exception {
+        NomineesRequestDto nomineesRequestDto = new NomineesRequestDto();
+
+        MvcResult mvcResult = mockMvc
+                .perform(post("/api/nominees/create").contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonToString(nomineesRequestDto)))
+                .andExpect(status().isUnprocessableEntity()).andReturn();
+
+        ErrorResponse errorResponse = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(),
+                ErrorResponse.class);
+
+        assertEquals(422, mvcResult.getResponse().getStatus());
+        assertEquals("BadRequest", errorResponse.getErrorCode());
+        assertEquals("Data is either missing or empty", errorResponse.getText());
+        verify(mockedNomineeService, times(0)).addNewNominees(any(NomineesRequestDto.class));
+    }
+
+    @Test
+    public void updateNomineeDetailsSuccessTest() throws Exception {
+        NomineeDto nomineeDto = createNomineeDto();
+        nomineeDto.setName("Jhon Doe");
+        nomineeDto.setPhone("9999999999");
+        String eKey = nomineeDto.getEkey();
+        when(mockedNomineeService.updateNomineesDetailByEkey(any(NomineeDto.class), any(String.class)))
+                .thenReturn(nomineeDto);
+        MvcResult mvcResult = mockMvc.perform(
+                put("/api/nominees/" + eKey).contentType(MediaType.APPLICATION_JSON).content(jsonToString(nomineeDto)))
+                .andExpect(status().isOk()).andReturn();
+
+        NomineeDto updatedNomineeDto = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(),
+                NomineeDto.class);
+        assertNotNull(updatedNomineeDto);
+        assertEquals(nomineeDto.getName(), updatedNomineeDto.getName());
+        assertEquals(nomineeDto.getPhone(), updatedNomineeDto.getPhone());
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        verify(mockedNomineeService, times(1)).updateNomineesDetailByEkey(any(NomineeDto.class), any(String.class));
+        verifyNoMoreInteractions(mockedNomineeService);
+    }
+
+    @Test
+    public void updateNomineeDetailsFailureTest() throws Exception {
+        NomineeDto nomineeDto = createNomineeDto();
+        nomineeDto.setName("");
+        String eKey = nomineeDto.getEkey();
+
+        MvcResult mvcResult = mockMvc.perform(
+                put("/api/nominees/" + eKey).contentType(MediaType.APPLICATION_JSON).content(jsonToString(nomineeDto)))
+                .andExpect(status().isUnprocessableEntity()).andReturn();
+        ErrorResponse errorResponse = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(),
+                ErrorResponse.class);
+        System.out.println(errorResponse);
+        assertEquals(422, mvcResult.getResponse().getStatus());
+        assertEquals(ErrorCode.MISSING_NAME.getName(), errorResponse.getErrorCode());
+        assertEquals("Name Should not be empty or null", errorResponse.getText());
+        verify(mockedNomineeService, times(0)).addNewNominees(any(NomineesRequestDto.class));
+
+    }
+
+    @Test
+    public void deleteNomineeSuccessTest() throws Exception {
+        String eKey = "8HSG0FpAxgqRezsp2WLajQ";
+        NomineeDto deletedNomineeDto = createNomineeDto();
+        when(mockedNomineeService.deleteNomineeByEkey(any(String.class))).thenReturn(deletedNomineeDto);
+
+        MvcResult mvcResult = mockMvc.perform(delete("/api/nominees/" + eKey).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andReturn();
+        NomineeDto updatedNomineeDto = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(),
+                NomineeDto.class);
+        assertNotNull(updatedNomineeDto);
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        verify(mockedNomineeService, times(1)).deleteNomineeByEkey(any(String.class));
+        verifyNoMoreInteractions(mockedNomineeService);
+    }
+
+    @Test
+    public void getAllActiveNomineeDetailsTest() throws Exception {
+        String phoneNumber = "123456789";
+        when(mockedNomineeService.getAllActiveNomineesDetails(any(String.class), any(Boolean.class)))
+                .thenReturn(createGetUserApiResponseDto());
+
+        MvcResult mvcResult = mockMvc
+                .perform(get("/api/nominees/" + phoneNumber).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andReturn();
+        List<NomineeDto> nomineeDtoList = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(),
+                List.class);
+
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        assertEquals(3, nomineeDtoList.size());
+        verify(mockedNomineeService, times(1)).getAllActiveNomineesDetails(any(String.class), any(Boolean.class));
+        verifyNoMoreInteractions(mockedNomineeService);
+    }
+
+    private NomineesRequestDto createNomineeRequestDto() {
+        NomineesRequestDto nomineesRequestDto = new NomineesRequestDto();
+        List<NomineeDto> nomineeDtoList = new ArrayList<>();
+        nomineeDtoList.add(NomineeDto.builder().id(89L).ekey("xyz").name("Steve Rogers").phone("123456789")
+                .dob(LocalDate.now()).gender(Gender.MALE).relation(RelationType.FATHER).build());
+        nomineeDtoList.add(NomineeDto.builder().name("Natasha").phone("1234567890").dob(LocalDate.now())
+                .gender(Gender.FEMALE).relation(RelationType.SPOUSE).build());
+        nomineeDtoList.add(NomineeDto.builder().name("Stacy").phone("123456789").dob(LocalDate.now())
+                .gender(Gender.FEMALE).relation(RelationType.MOTHER).build());
+        nomineesRequestDto.setUserId(78845L);
+        nomineesRequestDto.setNominees(nomineeDtoList);
+        return nomineesRequestDto;
+
+    }
+
+    private List<NomineeDto> getNomineeDtoList() {
+        List<NomineeDto> nomineeDtoList = new ArrayList<>();
+        nomineeDtoList.add(new NomineeDto(12345L, "8HSG0FpAxgqRezsp2WLajQ", "John Doe", RelationType.FATHER,
+                Gender.MALE, LocalDate.now(), "123456789"));
+        nomineeDtoList.add(new NomineeDto(12222L, "8HSG0FpAxgqRezsp2WLajQ", "Stacy", RelationType.MOTHER, Gender.FEMALE,
+                LocalDate.now(), "123456789"));
+        nomineeDtoList.add(new NomineeDto(12345L, "8HSG0FpAxgqRezsp2WLajQ", "Natalia", RelationType.SPOUSE,
+                Gender.FEMALE, LocalDate.now(), "123456789"));
+        return nomineeDtoList;
+    }
+
+    private NomineeDto createNomineeDto() {
+        return NomineeDto.builder().id(99L).ekey("8HSG0FpAxgqRezsp2WLajQ").name("John").relation(RelationType.FATHER)
+                .gender(Gender.MALE).dob(LocalDate.now()).phone("123456789").build();
+    }
+
+    private GetUserApiResponseDto createGetUserApiResponseDto() {
+        GetUserApiResponseDto userApiResponseDto = new GetUserApiResponseDto();
+        userApiResponseDto.setId(78845);
+        userApiResponseDto.setPhone("123456789");
+        userApiResponseDto.setFirstname("Jhon");
+        userApiResponseDto.setLastname("Doe");
+        userApiResponseDto.setNominees(getNomineeDtoList());
+
+        return userApiResponseDto;
+    }
+
+    // Parsing String format data into JSON format
+    private static String jsonToString(final Object obj) {
+        try {
+            final ObjectMapper mapper = new ObjectMapper();
+            return mapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
